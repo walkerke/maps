@@ -13,7 +13,7 @@ births_per_1000 <- get_acs(
 
 popup_content <- glue::glue(
   "<strong>{births_per_1000$NAME}</strong><br>",
-  "Birth per 1,000 women age 15-50: {births_per_1000$estimate}"
+  "Rate per 1,000 women age 15-50: {births_per_1000$estimate}"
 )
 
 births_per_1000$popup <- popup_content
