@@ -304,8 +304,7 @@ ui <- fluidPage(
           step = 0.1,
           width = "100%",
           animate = animationOptions(
-            interval = 100,
-            loop = TRUE
+            interval = 60
           )
         )
       )
