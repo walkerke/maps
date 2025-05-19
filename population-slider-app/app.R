@@ -1,4 +1,4 @@
-# app.R - Simple US Counties Population Visualization
+# app.R - Simple US Counties Population Visualization with Mobile Support
 # Load required packages
 library(shiny)
 library(mapgl)
@@ -25,8 +25,9 @@ style <- list(
 
 # Define UI
 ui <- fluidPage(
-  # Remove margins and make app full-screen
+  # Add viewport meta tag for responsive design
   tags$head(
+    tags$meta(name = "viewport", content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"),
     tags$style(HTML("
       body, html {
         margin: 0;
@@ -103,7 +104,7 @@ ui <- fluidPage(
         font-size: 1.6rem;
         font-weight: 600;
         padding-left: 15px;
-        transition: padding-left 0.2s ease; /* Smooth transition for position changes */
+        transition: padding-left 0.2s ease;
       }
 
       /* Center percentage with absolute positioning */
@@ -228,10 +229,95 @@ ui <- fluidPage(
         color: #ea580c;
         text-decoration: underline;
       }
+
+      /* Mobile Responsive Design */
+      @media (max-width: 768px) {
+        /* Adjust panel width for mobile */
+        .panel-content {
+          width: 90%;
+          padding: 15px;
+        }
+
+        /* Adjust slider width for mobile */
+        .slider-container {
+          width: 100%;
+        }
+
+        /* Adjust title for mobile - stack vertically */
+        .title-container {
+          height: auto;
+          margin-bottom: 10px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
+
+        /* Reset absolute positioning for mobile */
+        .left-text, .right-text, .percentage-container {
+          position: static;
+          transform: none;
+          width: 100%;
+          text-align: center;
+          padding: 0;
+          margin-bottom: 5px;
+        }
+
+        .percentage-value {
+          font-size: 3rem;
+          margin: 5px 0;
+        }
+
+        .left-text, .right-text {
+          font-size: 1.2rem;
+        }
+
+        /* Adjust info panels for mobile */
+        .county-counter, .data-source {
+          padding: 8px 12px;
+          font-size: 0.9rem;
+        }
+
+        .counter-number {
+          font-size: 1.1rem;
+        }
+
+        /* Adjust positions for mobile */
+        .county-counter {
+          bottom: 15px;
+          right: 15px;
+        }
+
+        .data-source {
+          bottom: 15px;
+          left: 15px;
+          max-width: 45%;
+        }
+      }
+
+      /* Extra small devices */
+      @media (max-width: 480px) {
+        .percentage-value {
+          font-size: 2.5rem;
+        }
+
+        .left-text, .right-text {
+          font-size: 1rem;
+        }
+
+        /* Further adjust info panels for very small screens */
+        .county-counter, .data-source {
+          padding: 5px 8px;
+          font-size: 0.8rem;
+        }
+
+        .counter-number {
+          font-size: 0.9rem;
+        }
+      }
     "))
   ),
 
-  # Additional JS to style the play button and adjust text spacing
+  # Additional JS to style the play button and adjust text spacing (with mobile detection)
   tags$script(HTML("
     $(document).ready(function() {
       // Style the animation button
@@ -252,8 +338,16 @@ ui <- fluidPage(
         subtree: true
       });
 
+      // Function to check if device is mobile
+      function isMobile() {
+        return window.innerWidth <= 768;
+      }
+
       // Function to adjust right text position based on percentage value
       function adjustRightTextPosition(percentValue) {
+        // Skip adjustment on mobile - we use stacked layout there
+        if (isMobile()) return;
+
         const rightText = $('.right-text');
         percentValue = parseFloat(percentValue);
 
@@ -287,6 +381,11 @@ ui <- fluidPage(
         childList: true,
         subtree: true
       });
+
+      // Handle window resize events to adjust layout
+      $(window).resize(function() {
+        adjustRightTextPosition($('.percentage-value').text());
+      });
     })")
   ),
 
@@ -301,16 +400,16 @@ ui <- fluidPage(
       # Title container with 3-column absolute layout
       div(
         class = "title-container",
-        # Left text (fixed position)
+        # Left text (fixed position on desktop, stacked on mobile)
         div(class = "left-text", "These Counties Represent"),
 
-        # Center percentage (fixed position)
+        # Center percentage (fixed position on desktop, stacked on mobile)
         div(
           class = "percentage-container",
           div(class = "percentage-value", textOutput("percentageValue"))
         ),
 
-        # Right text (position will be adjusted by JavaScript)
+        # Right text (position will be adjusted by JavaScript on desktop, stacked on mobile)
         div(class = "right-text", "of the US Population")
       ),
 
