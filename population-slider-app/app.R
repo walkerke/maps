@@ -27,8 +27,7 @@ style <- list(
 ui <- fluidPage(
   # Remove margins and make app full-screen
   tags$head(
-    tags$style(HTML(
-      "
+    tags$style(HTML("
       body, html {
         margin: 0;
         padding: 0;
@@ -203,13 +202,37 @@ ui <- fluidPage(
         color: #f97316;
         font-size: 1.5rem;
       }
-    "
-    ))
+
+      /* Data source attribution in bottom left */
+      .data-source {
+        position: absolute;
+        bottom: 40px;
+        left: 10px;
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 10px 15px;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        font-size: 0.9rem;
+        z-index: 10;
+        color: #555;
+      }
+
+      .data-source a {
+        color: #f97316;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+      }
+
+      .data-source a:hover {
+        color: #ea580c;
+        text-decoration: underline;
+      }
+    "))
   ),
 
   # Additional JS to style the play button and adjust text spacing
-  tags$script(HTML(
-    "
+  tags$script(HTML("
     $(document).ready(function() {
       // Style the animation button
       $('.slider-animate-button').addClass('play-pause-button');
@@ -264,9 +287,8 @@ ui <- fluidPage(
         childList: true,
         subtree: true
       });
-    });
-  "
-  )),
+    })")
+  ),
 
   # Map container
   mapboxglOutput("map", height = "100%"),
@@ -319,9 +341,19 @@ ui <- fluidPage(
     " of 3,144 counties"
   ),
 
+  # Data source attribution in bottom left
+  div(
+    class = "data-source",
+    "Data source: ",
+    a(
+      "2024 US Census Bureau Population Estimates",
+      href = "https://www.census.gov/data/datasets/time-series/demo/popest/2020s-counties-total.html",
+      target = "_blank"
+    )
+  ),
+
   # Add JavaScript for real-time slider updates
-  tags$script(HTML(
-    "
+  tags$script(HTML("
     $(document).ready(function() {
       // Add change event listener for real-time updates during dragging
       var sliderEl = $('#percentSlider');
@@ -335,9 +367,7 @@ ui <- fluidPage(
           }
         });
       }
-    });
-  "
-  ))
+    });"))
 )
 
 # Define server logic
