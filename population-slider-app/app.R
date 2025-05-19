@@ -2,6 +2,7 @@
 # Load required packages
 library(shiny)
 library(mapgl)
+library(readr)
 
 # Load county data
 ctys <- read_rds("county_data.rds")
@@ -27,20 +28,20 @@ ui <- fluidPage(
   tags$head(
     tags$style(HTML(
       "
-      body, html { 
-        margin: 0; 
-        padding: 0; 
-        height: 100vh; 
-        overflow: hidden; 
+      body, html {
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        overflow: hidden;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       }
-      
+
       /* Make container fill entire screen */
       .container-fluid {
         padding: 0 !important;
         height: 100vh;
       }
-      
+
       /* Full-screen map */
       #map, .mapboxgl-map {
         position: absolute !important;
@@ -50,7 +51,7 @@ ui <- fluidPage(
         bottom: 0;
         z-index: 1;
       }
-      
+
       /* Overlay panel for controls */
       .overlay-panel {
         position: absolute;
@@ -60,7 +61,7 @@ ui <- fluidPage(
         z-index: 10;
         text-align: center;
       }
-      
+
       /* Panel styling with fixed dimensions */
       .panel-content {
         display: inline-block;
@@ -71,14 +72,14 @@ ui <- fluidPage(
         width: 600px;
         margin: 0 auto;
       }
-      
+
       /* Title container with relative positioning */
       .title-container {
         position: relative;
         height: 70px;
         margin-bottom: 15px;
       }
-      
+
       /* Special layout trick: two fixed position divs */
       .left-text {
         position: absolute;
@@ -91,7 +92,7 @@ ui <- fluidPage(
         font-weight: 600;
         padding-right: 8px;
       }
-      
+
       .right-text {
         position: absolute;
         top: 50%;
@@ -104,7 +105,7 @@ ui <- fluidPage(
         padding-left: 15px;
         transition: padding-left 0.2s ease; /* Smooth transition for position changes */
       }
-      
+
       /* Center percentage with absolute positioning */
       .percentage-container {
         position: absolute;
@@ -113,7 +114,7 @@ ui <- fluidPage(
         transform: translate(-50%, -50%);
         width: 20%;
       }
-      
+
       .percentage-value {
         color: #f97316;
         font-weight: bold;
@@ -121,13 +122,13 @@ ui <- fluidPage(
         line-height: 1;
         text-align: center;
       }
-      
+
       /* Slider container */
       .slider-container {
         width: 500px;
         margin: 0 auto;
       }
-      
+
       /* Slider styling */
       .irs--shiny .irs-bar {
         background-color: #f97316;
@@ -136,12 +137,12 @@ ui <- fluidPage(
         height: 10px;
         top: 25px;
       }
-      
+
       .irs--shiny .irs-line {
         height: 10px;
         top: 25px;
       }
-      
+
       .irs--shiny .irs-handle {
         border: 2px solid #f97316;
         background-color: white;
@@ -149,40 +150,40 @@ ui <- fluidPage(
         height: 22px;
         top: 19px;
       }
-      
+
       .irs--shiny .irs-single {
         background-color: #f97316;
       }
-      
+
       /* Hide grid ticks and values */
       .irs-grid, .irs-min, .irs-max {
         display: none !important;
       }
-      
+
       /* Style the play button */
       .slider-animate-container {
         text-align: center;
         margin-top: 15px;
       }
-      
+
       .slider-animate-button {
         transform: scale(1.3);
       }
-      
+
       .play-pause-button {
         color: white !important;
         background-color: #f97316 !important;
         border-color: #ea580c !important;
-        font-weight: bold !important; 
+        font-weight: bold !important;
         padding: 6px 12px !important;
       }
-      
+
       .play-pause-button:hover {
         background-color: #ea580c !important;
         border-color: #c2410c !important;
         opacity: 1 !important;
       }
-      
+
       /* County counter panel in bottom right */
       .county-counter {
         position: absolute;
@@ -195,7 +196,7 @@ ui <- fluidPage(
         font-size: 1.4rem;
         z-index: 10;
       }
-      
+
       .counter-number {
         font-weight: bold;
         color: #f97316;
@@ -211,7 +212,7 @@ ui <- fluidPage(
     $(document).ready(function() {
       // Style the animation button
       $('.slider-animate-button').addClass('play-pause-button');
-      
+
       // Monitor for button recreation (when state changes)
       const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
@@ -220,18 +221,18 @@ ui <- fluidPage(
           }
         });
       });
-      
+
       // Start observing
-      observer.observe(document.querySelector('.slider-animate-container'), { 
-        childList: true, 
-        subtree: true 
+      observer.observe(document.querySelector('.slider-animate-container'), {
+        childList: true,
+        subtree: true
       });
-      
+
       // Function to adjust right text position based on percentage value
       function adjustRightTextPosition(percentValue) {
         const rightText = $('.right-text');
         percentValue = parseFloat(percentValue);
-        
+
         if (percentValue < 10) {
           // Single digit - move text closer
           rightText.css('padding-left', '5px');
@@ -243,10 +244,10 @@ ui <- fluidPage(
           rightText.css('padding-left', '20px');
         }
       }
-      
+
       // Initial adjustment
       adjustRightTextPosition($('.percentage-value').text());
-      
+
       // Monitor for changes in the percentage value
       const percentObserver = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
@@ -256,7 +257,7 @@ ui <- fluidPage(
           }
         });
       });
-      
+
       // Start observing percentage changes
       percentObserver.observe(document.querySelector('.percentage-value'), {
         childList: true,
@@ -325,7 +326,7 @@ ui <- fluidPage(
       // Add change event listener for real-time updates during dragging
       var sliderEl = $('#percentSlider');
       var ionSlider = sliderEl.data('ionRangeSlider');
-      
+
       if (ionSlider) {
         ionSlider.update({
           onChange: function(data) {
