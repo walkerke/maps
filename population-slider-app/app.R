@@ -3,6 +3,7 @@
 library(shiny)
 library(mapgl)
 library(readr)
+library(sf)
 
 # Load county data
 ctys <- read_rds("county_data.rds")
