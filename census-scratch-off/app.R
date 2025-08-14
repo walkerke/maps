@@ -8,6 +8,7 @@ library(tidycensus)
 library(shinybusy)
 options(tigris_use_cache = TRUE)
 
+
 # Format census labels for HTML map legends
 format_census_label <- function(label) {
   # Remove the Estimate/Percent prefix and split by !!
