@@ -984,30 +984,39 @@
       }
     },
     "mapgl": {
-      "Source": "CRAN",
-      "Repository": "https://cran.rstudio.com",
+      "Source": "github",
+      "Repository": null,
       "description": {
         "Package": "mapgl",
         "Title": "Interactive Maps with 'Mapbox GL JS' and 'MapLibre GL JS'",
-        "Version": "0.3.2",
-        "Date": "2025-07-17",
+        "Version": "0.4.0",
+        "Date": "2025-08-07",
         "Authors@R": "\n    person(given = \"Kyle\", family = \"Walker\", email = \"kyle@walker-data.com\", role = c(\"aut\", \"cre\"))",
         "Description": "Provides an interface to the 'Mapbox GL JS' (<https://docs.mapbox.com/mapbox-gl-js/guides>)\n    and the 'MapLibre GL JS' (<https://maplibre.org/maplibre-gl-js/docs/>) interactive mapping libraries to help users\n    create custom interactive maps in R.  Users can create interactive globe visualizations; layer 'sf' objects to create\n    filled maps, circle maps, 'heatmaps', and three-dimensional graphics; and customize map styles and views.  The package\n    also includes utilities to use 'Mapbox' and 'MapLibre' maps in 'Shiny' web applications.",
         "URL": "https://walker-data.com/mapgl/",
         "BugReports": "https://github.com/walkerke/mapgl/issues",
         "License": "MIT + file LICENSE",
         "Encoding": "UTF-8",
+        "Roxygen": "list(markdown = TRUE)",
         "RoxygenNote": "7.3.2",
         "Depends": "R (>= 4.1.0)",
         "Imports": "htmlwidgets, geojsonsf, sf, rlang, htmltools, grDevices,\nbase64enc, terra, classInt, shiny, viridisLite",
         "Suggests": "mapboxapi, usethis, leaflet",
+        "RemoteType": "github",
+        "RemoteHost": "api.github.com",
+        "RemoteRepo": "mapgl",
+        "RemoteUsername": "walkerke",
+        "RemoteRef": "HEAD",
+        "RemoteSha": "94b7a7aa12aa2271aa10e71aadea2e51eafa67b0",
+        "GithubRepo": "mapgl",
+        "GithubUsername": "walkerke",
+        "GithubRef": "HEAD",
+        "GithubSHA1": "94b7a7aa12aa2271aa10e71aadea2e51eafa67b0",
         "NeedsCompilation": "no",
-        "Packaged": "2025-07-17 21:17:35 UTC; kylewalker",
+        "Packaged": "2025-08-14 14:22:25 UTC; kylewalker",
         "Author": "Kyle Walker [aut, cre]",
         "Maintainer": "Kyle Walker <kyle@walker-data.com>",
-        "Repository": "CRAN",
-        "Date/Publication": "2025-07-17 21:30:02 UTC",
-        "Built": "R 4.5.0; ; 2025-07-17 22:56:32 UTC; unix"
+        "Built": "R 4.5.1; ; 2025-08-14 14:22:26 UTC; unix"
       }
     },
     "memoise": {
@@ -1852,7 +1861,10 @@
   },
   "files": {
     "app.R": {
-      "checksum": "93ccdec5e9de7d4a292372afc8faa11b"
+      "checksum": "972be15f34ec024229fe9eac6462404b"
+    },
+    "index.html": {
+      "checksum": "e699013aae5b014eb73e198e5eb92cb4"
     }
   },
   "users": null
