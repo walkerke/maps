@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Map Projection Circle Distortion Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.14.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.14.0/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+
+        #controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(255, 255, 255, 0.85);
+            padding: 15px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        #controls h4 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+
+        #controls select {
+            width: 100%;
+            padding: 5px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background-color: white;
+        }
+
+        #controls p {
+            font-size: 12px;
+            color: #666;
+            margin: 10px 0 0 0;
+        }
+    </style>
+</head>
+<body>
+    <div id='map'></div>
+
+    <div id='controls'>
+        <h4>Map Projection Demo</h4>
+        <select id='projection-select'>
+            <option value='mercator'>Mercator</option>
+            <option value='naturalEarth'>Natural Earth</option>
+            <option value='winkelTripel'>Winkel Tripel</option>
+            <option value='equalEarth'>Equal Earth</option>
+            <option value='equirectangular'>Equirectangular</option>
+            <option value='globe'>Globe</option>
+        </select>
+        <p>Hover to see how a 500km circle distorts across different projections.</p>
+    </div>
+
+    <script>
+        // Initialize map with your Mapbox access token
+        mapboxgl.accessToken = 'pk.eyJ1Ijoia3dhbGtlcnRjdSIsImEiOiJMRk9JSmRvIn0.l1y2jHZ6IARHM_rA1-X45A';
+
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/standard',
+            center: [0, 0],
+            zoom: 2,
+            projection: 'mercator'
+        });
+
+        // Create initial empty GeoJSON source
+        map.on('load', () => {
+            // Add source for the hover circle
+            map.addSource('hover-circle', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Polygon',
+                        'coordinates': [[]]
+                    }
+                }
+            });
+
+            // Add fill layer for the circle
+            map.addLayer({
+                'id': 'hover-circle-fill',
+                'type': 'fill',
+                'source': 'hover-circle',
+                'paint': {
+                    'fill-color': 'magenta',
+                    'fill-opacity': 0.4
+                }
+            });
+        });
+
+        // Handle projection changes
+        document.getElementById('projection-select').addEventListener('change', (e) => {
+            map.setProjection(e.target.value);
+        });
+
+        // Handle mouse movement
+        map.on('mousemove', (e) => {
+            // Create a 500km buffer circle using Turf.js
+            const center = [e.lngLat.lng, e.lngLat.lat];
+            const radius = 500; // kilometers
+            const options = {steps: 64, units: 'kilometers'};
+
+            try {
+                const circle = turf.circle(center, radius, options);
+
+                // Update the source with the new circle
+                map.getSource('hover-circle').setData(circle);
+            } catch (error) {
+                // Handle errors at extreme latitudes
+                console.log('Error creating circle at extreme latitude');
+            }
+        });
+
+        // Clear circle when mouse leaves the map
+        map.on('mouseleave', () => {
+            map.getSource('hover-circle').setData({
+                'type': 'Feature',
+                'geometry': {
+                    'type': 'Polygon',
+                    'coordinates': [[]]
+                }
+            });
+        });
+    </script>
+</body>
+</html>
