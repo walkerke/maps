@@ -60,7 +60,7 @@ ui <- page_fluid(
       .mobile-header {
         display: none;
       }
-      
+
       .toggle-btn {
         background: transparent;
         border: none;
@@ -68,7 +68,7 @@ ui <- page_fluid(
         cursor: pointer;
         color: #333;
       }
-      
+
       @media (max-width: 767px) {
         .floating-sidebar {
           position: fixed !important;
@@ -81,39 +81,39 @@ ui <- page_fluid(
           max-height: 70vh !important;
           transition: all 0.3s ease;
         }
-        
+
         .mobile-header {
           display: flex !important;
           justify-content: space-between;
           align-items: center;
           margin-bottom: 0;
         }
-        
+
         .mobile-title {
           margin: 0;
           font-size: 1.1rem;
         }
-        
+
         /* Collapsed state */
         .floating-sidebar:not(.expanded) {
           max-height: 50px !important;
           overflow: hidden;
         }
-        
+
         .floating-sidebar:not(.expanded) .sidebar-content {
           display: none;
         }
-        
+
         /* Expanded state */
         .floating-sidebar.expanded {
           max-height: 70vh !important;
         }
-        
+
         .floating-sidebar.expanded .sidebar-content {
           display: block;
           margin-top: 15px;
         }
-        
+
         .floating-sidebar h5 {
           font-size: 0.95rem;
         }
@@ -166,11 +166,11 @@ ui <- page_fluid(
   div(class = "floating-sidebar", id = "sidebar",
       div(class = "mobile-header",
           h4(class = "mobile-title", "DFW Metro Boundary"),
-          actionButton("toggle_panel", "", 
+          actionButton("toggle_panel", "",
                        icon = icon("chevron-down", class = "toggle-icon"),
                        class = "toggle-btn")
       ),
-      
+
       div(class = "sidebar-content", id = "sidebar-content",
           p("Draw what YOU think is the Dallas-Fort Worth metro area boundary!"),
           hr(),
@@ -209,7 +209,7 @@ ui <- page_fluid(
               textOutput("submission_count")
           )
       ),
-      
+
       tags$script(HTML("
         // Toggle panel on mobile
         $(document).on('click', '#toggle_panel', function(e) {
@@ -217,7 +217,7 @@ ui <- page_fluid(
           $('#sidebar').toggleClass('expanded');
           $('.toggle-icon').toggleClass('fa-chevron-down fa-chevron-up');
         });
-        
+
         // Initialize panel state based on screen size
         $(document).ready(function() {
           if (window.innerWidth < 768) {
@@ -259,7 +259,13 @@ server <- function(input, output, session) {
         fill_opacity = 0.3,
         active_color = "#ff6b6b",
         vertex_radius = 6,
-        line_width = 3
+        line_width = 3,
+        controls = list(
+          point = FALSE,
+          line_string = FALSE,
+          combine_features = FALSE,
+          uncombine_features = FALSE
+        )
       )
   })
 
@@ -280,7 +286,7 @@ server <- function(input, output, session) {
         substr(session$token, 1, 8),
         ".rds"
       )
-      
+
       # Save to individual file
       saveRDS(drawn_features, file.path(submissions_dir, filename))
 
@@ -306,16 +312,16 @@ server <- function(input, output, session) {
   # Show all responses
   observeEvent(input$show_responses, {
     submission_files <- list.files(submissions_dir, pattern = "\\.rds$", full.names = TRUE)
-    
+
     if (length(submission_files) > 0) {
       # Read all submission files
       submissions <- lapply(submission_files, function(f) {
         tryCatch(readRDS(f), error = function(e) NULL)
       })
-      
+
       # Remove any NULL entries (corrupted files)
       submissions <- submissions[!sapply(submissions, is.null)]
-      
+
       if (length(submissions) > 0) {
         # Combine all submissions into one sf object
         all_boundaries <- dplyr::bind_rows(submissions)
