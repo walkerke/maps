@@ -443,6 +443,7 @@ function lngLatObject(coord) {
 
 function finishDrag(point) {
   if (!dragging || !startCenterPoint) return;
+  const finalOverlay = movedDuringDrag ? overlayAtDragPoint(point) : null;
 
   dragging = false;
   startPoint = null;
@@ -452,17 +453,18 @@ function finishDrag(point) {
   map.getCanvas().style.cursor = "";
 
   if (movedDuringDrag) {
-    const dropped = dropPointFromDrag(point);
-    currentDrop = { lng: dropped.lng, lat: dropped.lat };
-    updateOverlay({ fit: false });
+    currentOverlay = finalOverlay;
+    currentOverlayCenter = centroidCoord(currentOverlay);
+    currentDrop = lngLatObject(currentOverlayCenter);
+    ensureSource("overlay", currentOverlay);
+    updateLabels();
   }
 }
 
-function dropPointFromDrag(point) {
-  return map.unproject({
-    x: startCenterPoint.x + point.x - startPoint.x,
-    y: startCenterPoint.y + point.y - startPoint.y
-  });
+function overlayAtDragPoint(point) {
+  const dx = point.x - startPoint.x;
+  const dy = point.y - startPoint.y;
+  return translatedOverlay(dx, dy);
 }
 
 function wireMapDrag() {
@@ -492,7 +494,7 @@ function wireMapDrag() {
     const dx = point.x - startPoint.x;
     const dy = point.y - startPoint.y;
     if (Math.abs(dx) + Math.abs(dy) > 2) movedDuringDrag = true;
-    map.getSource("overlay").setData(translatedOverlay(dx, dy));
+    map.getSource("overlay").setData(overlayAtDragPoint(point));
   });
 
   map.on("mouseup", (event) => {
