@@ -1,5 +1,6 @@
 const STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
 const EARTH_RADIUS = 6378137;
+const DATA_VERSION = "2024-acs-v2";
 
 const DEFAULTS = {
   sourceState: "CO",
@@ -32,8 +33,8 @@ let dragging = false;
 let movedDuringDrag = false;
 let startPoint = null;
 let startCenterPoint = null;
+let startOverlay = null;
 let targetPopup = null;
-let hoveredTargetId = null;
 
 function featureCollection(features) {
   return {
@@ -170,6 +171,18 @@ function translateAndScaleToPoint(sourceFeature, lngLat) {
   });
 }
 
+function mapCoordinate(coord, dx, dy) {
+  const point = map.project(coord);
+  point.x += dx;
+  point.y += dy;
+  const lngLat = map.unproject(point);
+  return [lngLat.lng, lngLat.lat];
+}
+
+function translatedOverlay(dx, dy) {
+  return transformCollection(startOverlay, (coord) => mapCoordinate(coord, dx, dy));
+}
+
 function selectedFeature(collection, geoid) {
   return collection.features.find((feature) => placeGeoid(feature) === geoid);
 }
@@ -228,7 +241,7 @@ function populatePlaces(select, collection, preferredName) {
 
 async function loadPlaces(state) {
   if (!stateCache.has(state)) {
-    const response = await fetch(`data/places-${state}.geojson`);
+    const response = await fetch(`data/places-${state}.geojson?v=${DATA_VERSION}`);
     if (!response.ok) {
       throw new Error(`Could not load places for ${state}`);
     }
@@ -331,12 +344,7 @@ function addMapLayers() {
     source: "targets",
     paint: {
       "fill-color": "#7cc7d8",
-      "fill-opacity": [
-        "case",
-        ["boolean", ["feature-state", "hover"], false],
-        0.3,
-        0.14
-      ]
+      "fill-opacity": 0.14
     }
   });
   addLayerIfMissing({
@@ -346,24 +354,18 @@ function addMapLayers() {
     paint: {
       "line-color": [
         "case",
-        ["boolean", ["feature-state", "hover"], false],
-        "#0f7589",
         ["==", ["get", "LSAD"], "57"],
         "#62b8c8",
         "#1f9bb4"
       ],
       "line-width": [
         "case",
-        ["boolean", ["feature-state", "hover"], false],
-        3.2,
         ["==", ["get", "LSAD"], "57"],
         1.4,
         1.8
       ],
       "line-opacity": [
         "case",
-        ["boolean", ["feature-state", "hover"], false],
-        0.95,
         ["==", ["get", "LSAD"], "57"],
         0.5,
         0.68
@@ -445,6 +447,7 @@ function finishDrag(point) {
   dragging = false;
   startPoint = null;
   startCenterPoint = null;
+  startOverlay = null;
   map.dragPan.enable();
   map.getCanvas().style.cursor = "";
 
@@ -478,20 +481,18 @@ function wireMapDrag() {
     movedDuringDrag = false;
     startPoint = map.project(event.lngLat);
     startCenterPoint = map.project(currentOverlayCenter);
+    startOverlay = clone(currentOverlay);
     map.dragPan.disable();
     map.getCanvas().style.cursor = "grabbing";
   });
 
   map.on("mousemove", (event) => {
-    if (!dragging || !startCenterPoint) return;
+    if (!dragging || !startCenterPoint || !startOverlay) return;
     const point = map.project(event.lngLat);
     const dx = point.x - startPoint.x;
     const dy = point.y - startPoint.y;
     if (Math.abs(dx) + Math.abs(dy) > 2) movedDuringDrag = true;
-    const previewDrop = dropPointFromDrag(point);
-    map.getSource("overlay").setData(
-      translateAndScaleToPoint(selectedSource, [previewDrop.lng, previewDrop.lat])
-    );
+    map.getSource("overlay").setData(translatedOverlay(dx, dy));
   });
 
   map.on("mouseup", (event) => {
@@ -504,35 +505,12 @@ function wireMapDrag() {
 }
 
 function wireTargetPopups() {
-  map.on("mousemove", "targets-fill", (event) => {
-    if (dragging || !event.features.length) return;
-
-    map.getCanvas().style.cursor = "pointer";
-    const geoid = event.features[0].properties.GEOID;
-
-    if (hoveredTargetId && hoveredTargetId !== geoid) {
-      map.setFeatureState(
-        { source: "targets", id: hoveredTargetId },
-        { hover: false }
-      );
-    }
-
-    hoveredTargetId = geoid;
-    map.setFeatureState(
-      { source: "targets", id: hoveredTargetId },
-      { hover: true }
-    );
+  map.on("mouseenter", "targets-fill", () => {
+    if (!dragging) map.getCanvas().style.cursor = "pointer";
   });
 
   map.on("mouseleave", "targets-fill", () => {
     if (!dragging) map.getCanvas().style.cursor = "";
-    if (hoveredTargetId) {
-      map.setFeatureState(
-        { source: "targets", id: hoveredTargetId },
-        { hover: false }
-      );
-      hoveredTargetId = null;
-    }
   });
 
   map.on("click", "targets-fill", (event) => {
