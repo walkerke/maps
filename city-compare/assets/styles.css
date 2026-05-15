@@ -1,0 +1,171 @@
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+#map {
+  position: absolute;
+  inset: 0;
+}
+
+.panel {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 10;
+  width: min(390px, calc(100vw - 28px));
+  box-sizing: border-box;
+  padding: 13px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.16);
+}
+
+.panel h1 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  line-height: 1.2;
+  font-weight: 650;
+}
+
+.control-row {
+  margin-bottom: 10px;
+}
+
+.control-row label,
+.toggle-row {
+  display: block;
+  font-size: 13px;
+  font-weight: 650;
+  color: #222;
+}
+
+.control-row label > span {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.paired-inputs {
+  display: grid;
+  grid-template-columns: 122px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+select {
+  width: 100%;
+  height: 37px;
+  box-sizing: border-box;
+  border: 1px solid #c8c8c8;
+  border-radius: 7px;
+  background: #fff;
+  color: #222;
+  font: inherit;
+  font-weight: 450;
+  padding: 0 32px 0 10px;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0 11px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  font-weight: 500;
+}
+
+.toggle-row input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.stat {
+  font-size: 12px;
+  line-height: 1.25;
+  color: #333;
+}
+
+.stat span {
+  display: block;
+}
+
+.stat b {
+  display: block;
+  color: #111;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.maplibregl-canvas {
+  outline: none;
+}
+
+.place-popup {
+  min-width: 170px;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+.place-popup-title {
+  margin-bottom: 2px;
+  font-size: 14px;
+  font-weight: 650;
+  color: #111;
+}
+
+.place-popup-meta {
+  margin-bottom: 9px;
+  font-size: 12px;
+  color: #555;
+}
+
+.place-popup button {
+  width: 100%;
+  height: 32px;
+  border: 1px solid #147d93;
+  border-radius: 6px;
+  background: #168ea6;
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.place-popup button:hover {
+  background: #0f7589;
+}
+
+@media (max-width: 520px) {
+  .panel {
+    top: 8px;
+    left: 8px;
+    width: calc(100vw - 16px);
+  }
+
+  .paired-inputs {
+    grid-template-columns: 86px minmax(0, 1fr);
+  }
+}

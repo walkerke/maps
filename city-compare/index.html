@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>City Footprint Drag Compare</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.css"
+    />
+    <link rel="stylesheet" href="assets/styles.css" />
+    <script src="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.js"></script>
+    <script src="https://unpkg.com/@turf/turf@7.2.0/turf.min.js"></script>
+  </head>
+  <body>
+    <main id="map"></main>
+
+    <section class="panel" aria-label="City footprint controls">
+      <h1>City footprint drag compare</h1>
+
+      <div class="control-row">
+        <label>
+          <span>Move city</span>
+          <div class="paired-inputs">
+            <select id="source-state" aria-label="Move city state"></select>
+            <select id="source-place" aria-label="Move city"></select>
+          </div>
+        </label>
+      </div>
+
+      <div class="control-row">
+        <label>
+          <span>Compare over</span>
+          <div class="paired-inputs">
+            <select id="target-state" aria-label="Compare state"></select>
+            <select id="target-place" aria-label="Compare city"></select>
+          </div>
+        </label>
+      </div>
+
+      <label class="toggle-row">
+        <input id="isolate-target" type="checkbox" />
+        <span>Isolate selected compare city</span>
+      </label>
+
+      <div class="stats" aria-live="polite">
+        <div class="stat">
+          <span>Moved city</span>
+          <b id="source-area">...</b>
+        </div>
+        <div class="stat">
+          <span>Base city</span>
+          <b id="target-area">...</b>
+        </div>
+      </div>
+    </section>
+
+    <script src="assets/app.js"></script>
+  </body>
+</html>
