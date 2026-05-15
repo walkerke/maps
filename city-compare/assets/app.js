@@ -33,6 +33,7 @@ let movedDuringDrag = false;
 let startPoint = null;
 let startCenterPoint = null;
 let targetPopup = null;
+let hoveredTargetId = null;
 
 function featureCollection(features) {
   return {
@@ -61,6 +62,15 @@ function placeGeoid(feature) {
 
 function placePopulation(feature) {
   return Number(feature.properties.population || feature.properties.value || 0);
+}
+
+function placeType(feature) {
+  return feature.properties.place_type ||
+    (feature.properties.LSAD === "57" ? "CDP" : "Incorporated place");
+}
+
+function isCdp(feature) {
+  return placeType(feature) === "CDP" || feature.properties.LSAD === "57";
 }
 
 function formatPopulation(value) {
@@ -204,7 +214,8 @@ function populatePlaces(select, collection, preferredName) {
     const label = nameCounts.get(placeName(feature)) > 1
       ? `${placeLabel(feature)} (${placeGeoid(feature)})`
       : placeLabel(feature);
-    option.textContent = `${label} - ${formatPopulation(placePopulation(feature))}`;
+    const typeLabel = isCdp(feature) ? " CDP" : "";
+    option.textContent = `${label}${typeLabel} - ${formatPopulation(placePopulation(feature))}`;
     select.appendChild(option);
 
     if (placeLabel(feature) === preferredName && preferredValue === null) {
@@ -231,7 +242,7 @@ function ensureSource(id, data) {
   if (map.getSource(id)) {
     map.getSource(id).setData(data);
   } else {
-    map.addSource(id, { type: "geojson", data });
+    map.addSource(id, { type: "geojson", data, promoteId: "GEOID" });
   }
 }
 
@@ -323,7 +334,7 @@ function addMapLayers() {
       "fill-opacity": [
         "case",
         ["boolean", ["feature-state", "hover"], false],
-        0.24,
+        0.3,
         0.14
       ]
     }
@@ -333,9 +344,36 @@ function addMapLayers() {
     type: "line",
     source: "targets",
     paint: {
-      "line-color": "#1f9bb4",
-      "line-width": 1.8,
-      "line-opacity": 0.65
+      "line-color": [
+        "case",
+        ["boolean", ["feature-state", "hover"], false],
+        "#0f7589",
+        ["==", ["get", "LSAD"], "57"],
+        "#62b8c8",
+        "#1f9bb4"
+      ],
+      "line-width": [
+        "case",
+        ["boolean", ["feature-state", "hover"], false],
+        3.2,
+        ["==", ["get", "LSAD"], "57"],
+        1.4,
+        1.8
+      ],
+      "line-opacity": [
+        "case",
+        ["boolean", ["feature-state", "hover"], false],
+        0.95,
+        ["==", ["get", "LSAD"], "57"],
+        0.5,
+        0.68
+      ],
+      "line-dasharray": [
+        "case",
+        ["==", ["get", "LSAD"], "57"],
+        ["literal", [2, 2]],
+        ["literal", [1, 0]]
+      ]
     }
   });
   addLayerIfMissing({
@@ -466,12 +504,35 @@ function wireMapDrag() {
 }
 
 function wireTargetPopups() {
-  map.on("mouseenter", "targets-fill", () => {
-    if (!dragging) map.getCanvas().style.cursor = "pointer";
+  map.on("mousemove", "targets-fill", (event) => {
+    if (dragging || !event.features.length) return;
+
+    map.getCanvas().style.cursor = "pointer";
+    const geoid = event.features[0].properties.GEOID;
+
+    if (hoveredTargetId && hoveredTargetId !== geoid) {
+      map.setFeatureState(
+        { source: "targets", id: hoveredTargetId },
+        { hover: false }
+      );
+    }
+
+    hoveredTargetId = geoid;
+    map.setFeatureState(
+      { source: "targets", id: hoveredTargetId },
+      { hover: true }
+    );
   });
 
   map.on("mouseleave", "targets-fill", () => {
     if (!dragging) map.getCanvas().style.cursor = "";
+    if (hoveredTargetId) {
+      map.setFeatureState(
+        { source: "targets", id: hoveredTargetId },
+        { hover: false }
+      );
+      hoveredTargetId = null;
+    }
   });
 
   map.on("click", "targets-fill", (event) => {
@@ -481,6 +542,7 @@ function wireTargetPopups() {
     const geoid = feature.properties.GEOID;
     const label = placeLabel(feature);
     const population = formatPopulation(placePopulation(feature));
+    const type = placeType(feature);
 
     if (targetPopup) targetPopup.remove();
 
@@ -493,7 +555,9 @@ function wireTargetPopups() {
       .setHTML(`
         <div class="place-popup">
           <div class="place-popup-title">${escapeHtml(label)}</div>
-          <div class="place-popup-meta">Population ${escapeHtml(population)}</div>
+          <div class="place-popup-meta">
+            ${escapeHtml(type)} · Population ${escapeHtml(population)}
+          </div>
           <button type="button" data-compare-geoid="${escapeHtml(geoid)}">
             Compare here
           </button>

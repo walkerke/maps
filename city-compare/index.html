@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>City Footprint Drag Compare</title>
+    <title>Compare U.S. City Footprints</title>
     <link
       rel="stylesheet"
       href="https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.css"
@@ -16,7 +16,11 @@
     <main id="map"></main>
 
     <section class="panel" aria-label="City footprint controls">
-      <h1>City footprint drag compare</h1>
+      <h1>Compare U.S. City Footprints</h1>
+      <p class="subtitle">
+        Choose a city, drag its footprint across the map, or click a blue city
+        and select Compare here.
+      </p>
 
       <div class="control-row">
         <label>
@@ -53,6 +57,15 @@
           <b id="target-area">...</b>
         </div>
       </div>
+
+      <p class="credits">
+        Sources: U.S. Census Bureau TIGER/Line places, including
+        Census-designated places, and ACS 2020-2024 5-year total population
+        estimates. Built by
+        <a href="https://walker-data.com" target="_blank" rel="noopener"
+          >Kyle Walker</a
+        >.
+      </p>
     </section>
 
     <script src="assets/app.js"></script>
